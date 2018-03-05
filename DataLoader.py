@@ -12,11 +12,11 @@ class MNISTLoader(object):
     """
     def __init__(self, mode='train'):
         if mode == 'train':
-            self.data_file = os.path.join(data, 'train-images-idx3-ubyte')
-            self.label_file = os.path.join(data, 'train-labels-idx1-ubyte')
+            self.data_file = os.path.join(os.getcwd(),'data', 'train-images-idx3-ubyte')
+            self.label_file = os.path.join(os.getcwd(),'data', 'train-labels-idx1-ubyte')
         else:
-            self.data_file = os.path.join('t10k-images-idx3-ubyte')
-            self.label_file = os.path.join('t10k-labels-idx1-ubyte')  
+            self.data_file = os.path.join(os.getcwd(),'data','t10k-images-idx3-ubyte')
+            self.label_file = os.path.join(os.getcwd(),'data','t10k-labels-idx1-ubyte')  
     
     def load_data(self):
         lf = open(self.label_file, 'rb')

@@ -30,7 +30,7 @@ class Network(object):
 		self.biases = [np.random.randn(y,1) for y in self.sizes[1:]]
 		self.weights = [np.random.randn(y,x) for x,y in zip(self.sizes[:-1], self.sizes[1:])]
 		# self.init_weights = copy.deepcopy(self.weights) # initial array of weights for karnin. 
-		self.slist = [np.zeros_like(w) for w in self.weights] # the sensitivity list. 
+		self.slist = [np.zeros(w.shape) for w in self.weights] # the sensitivity list. 
 		self.grads = [] # stored as list of list of grads of each layer. 
 
 
@@ -40,9 +40,9 @@ class Network(object):
 		y = \sigma(X.w + b) 
 		"""
 		for w,b in zip(self.weights, self.biases):
-			y = sigmoid_forward(np.dot(w,x) + b)
+			x = sigmoid_forward(np.dot(w,x) + b)
 
-		return y
+		return x
 
 
 
@@ -51,6 +51,8 @@ class Network(object):
 		Trains a neural network using SGD(no momentum). 
 		"""
 		train_len = len(y_train)
+		init_weight = copy.deepcopy(self.weights)
+		np.savez('init_weights.npz', init_weight)
 
 		for it in range(num_iters):
 			idx = random.sample(range(train_len), batch_size)
@@ -66,16 +68,14 @@ class Network(object):
 				nabla_b = [b+db for b,db in zip(nabla_b, delta_b)]
 				nabla_w = [w+dw for w,dw in zip(nabla_w, delta_w)]
 
-			init_weights = copy.deepcopy(self.weights)
+			
 			self.weights = [w-(lr/batch_size)*nw for w,nw in zip(self.weights, nabla_w)]
-			delta_w = [wf-wi for wf, wi in zip(self.weights, init_weights)]
-			print(len(delta_w))
 			self.biases  = [b-(lr/batch_size)*nb for b,nb in zip(self.biases, nabla_b)]
-			upd = self.update_slist(init_weights, delta_w, nabla_w, lr,batch_size)
-			# print(upd)
-			self.slist = [s+u for s,u in zip(self.slist, upd)]
-            
+			diff = [np.square(nw)/lr for nw in nabla_w]
+			self.slist = [s+d for s,d in zip(self.slist, diff)]           
 			print("Iteration:{}".format(it))
+
+		np.savez('checkpoint.npz', self.weights, self.biases, self.slist)
 
 
 	# def update_mini_batch(self,mini_batch, lr):
@@ -108,7 +108,7 @@ class Network(object):
 		net_lst = [] 
 
 		for b,w in zip(self.biases, self.weights):
-			print("w shape: {}".format(w.shape))
+			# print("w shape: {}".format(w.shape))
 			net = np.dot(w, activation) + b 
 			net_lst.append(net)
 			activation = sigmoid_forward(net) 
@@ -128,33 +128,23 @@ class Network(object):
 		return (nabla_b, nabla_w)
 
 
-	def update_slist(self, w_i, delta_w, grad_w, lr,batch_size):
-		"""
-		Update the sensisitvity list 
-		"""
-		update_mini = [np.zeros_like(w) for w in self.weights]
-		# for l in range(self.num_layers -1):
-		# 	print("grad_w shape:{}".format(grad_w[l].shape))
-		# 	print("w_i shape: {}".format(w_i[l].shape))
-		# 	print("w_f shape:{}".format(w_f[l].shape))
+	# def update_slist(self, lr, grad_w):
+	# 	"""
+	# 	Update the sensisitvity list 
+	# 	"""
+	# 	shp_lst = [np.dot(gw.T, gw).shape for gw in grad_w]
+	# 	# print(shp_lst)
+	# 	slist = [np.zeros(sp) for sp in shp_lst]
+	# 	print(self.slist)
+	# 	prod_lst = [np.dot(gw.T, gw)/lr for gw in grad_w]
+	# 	slist = [s+p for s,p in zip(self.slist, prod_lst)]
 		
-		for l in range(self.num_layers-1):
-			damper = (np.dot(grad_w[l], grad_w[l].T))*batch_size/lr 
-			print("Damper shape:{}".format(damper.shape))
-			diff = w_i[l]/delta_w[l]
-			print("Diff shape:{}".format(diff.shape))
 
 		
-				
-			update_mini[l] = np.dot(damper, diff)
-			
-			
-		return update_mini
+	def evaluate(self, test_data, test_labels ):
+		res = [self.feedforward(x) for x in test_data]
 
-	def evaluate(self, test_data):
-		res = [(np.argmax(self.feedforward(x)), y) for x,y in test_data]
-
-		return sum(int(x==y) for x,y in test_data)
+		return sum([int(np.argmax(res[i])== np.argmax(test_labels[i])) for i in range(len(res))])/float(len(res))
 
 
 
