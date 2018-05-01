@@ -150,21 +150,21 @@ class Network(object):
 
 
 
-# if __name__ == '__main__':
-# 	ml = MNISTLoader()
-# 	labels, data = ml.load_data()
-# 	sz_list = [784, 100, 10]
-# 	net = Network(sz_list)
-# 	print(len(net.weights))
-# 	assert(net.weights[0].shape == (100,784)), "weights of hidden layer do not match"
-# 	assert(net.weights[1].shape == (10,100)), "weights of the output layer do not match"
+if __name__ == '__main__':
+	ml = MNISTLoader()
+	labels, data = ml.load_data()
+	sz_list = [784, 100, 10]
+	net = Network(sz_list)
+	print(len(net.weights))
+	assert(net.weights[0].shape == (100,784)), "weights of hidden layer do not match"
+	assert(net.weights[1].shape == (10,100)), "weights of the output layer do not match"
 
-# 	lr = 1e-2
-# 	batch_size = 5
-# 	num_iters =  5 
-# 	# print("sensisitvity list before:{}".format(net.slist))
-# 	net.train(data, labels,lr,num_iters,batch_size)
-# 	print("sensisitvity list after:{}".format(net.slist))
+	lr = 1e-2
+	batch_size = 5
+	num_iters =  5 
+	# print("sensisitvity list before:{}".format(net.slist))
+	net.train(data, labels,lr,num_iters,batch_size)
+	print("sensisitvity list after:{}".format(net.slist))
 
 
 
