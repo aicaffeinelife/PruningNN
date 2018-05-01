@@ -4,4 +4,4 @@ A Python module to build Karnin Pruning and test it on MNIST Data. Karnin Prunin
 
 
 
-
+To run the script simply run `python network1.py` and look at the logs. It's not pretty but it works. 
